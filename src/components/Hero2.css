@@ -1,0 +1,17 @@
+/* Styles specific to Hero2 variant */
+
+.hero-2 {
+  /* keep background handled inline in Hero2.jsx */
+}
+
+.hero-2 .st-desc,
+.hero-2 .st-text {
+  color: #ffffffb6 !important;
+}
+
+.hero-2 .st-desc:hover,
+.hero-2 .st-text:hover {
+  color: #ffffffb6 !important;
+}
+
+/* If you want hero-2 specific button adjustments, add them here */

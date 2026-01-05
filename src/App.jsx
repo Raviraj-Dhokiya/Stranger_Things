@@ -1,83 +1,76 @@
-
 import './App.css'
 import { useState, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Hero from './components/Hero'
 import Hero2 from './components/Hero2'
+import ShatterOverlay from './components/ShatterOverlay'
 
 function App() {
   const [showFirst, setShowFirst] = useState(true)
-  const audioRef = useRef(null)
+  const [isShattering, setIsShattering] = useState(false)
+
+  // used only to disable entry animation on very first mount
+  const firstLoad = useRef(true)
 
   useEffect(() => {
-    const a = audioRef.current
-    if (!a) return
-
-    const tryPlay = () => {
-      a.play().catch(() => {
-      })
-    }
-
-    tryPlay()
-
-    const startOnGesture = () => {
-      a.play().catch(() => {})
-      document.removeEventListener('click', startOnGesture)
-      document.removeEventListener('touchstart', startOnGesture)
-    }
-
-    document.addEventListener('click', startOnGesture, { once: true })
-    document.addEventListener('touchstart', startOnGesture, { once: true })
-
-    return () => {
-      document.removeEventListener('click', startOnGesture)
-      document.removeEventListener('touchstart', startOnGesture)
-    }
+    firstLoad.current = false
   }, [])
 
-  const variants = {
-    enter: { opacity: 0, y: 30 },
-    center: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -30 },
+  const handleSwitch = () => {
+    if (isShattering) return
+
+    // 🔥 IMPORTANT ORDER
+    setShowFirst(prev => !prev)   // switch component FIRST
+    setIsShattering(true)         // then run shatter animation
   }
+
+ const variants = {
+  enter:  { opacity: 0, scale: 0.95 },
+  center: { opacity: 1, scale: 1 },
+  exit:   { opacity: 0, scale: 0.95 },
+}
 
   return (
     <>
-      <audio
-        ref={audioRef}
-        src="/music/Stranger_Things.mp3"
-        autoPlay
-        loop
-        playsInline
-        preload="auto"
-        aria-label="background-music"
-      />
+      <div style={{ perspective: 1200 }}>
+        <AnimatePresence mode="wait">
+          {showFirst ? (
+            <motion.div
+              key="hero"
+              style={{ transformStyle: 'preserve-3d' }}
+              variants={variants}
+              initial={firstLoad.current ? 'center' : 'enter'}
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.7, ease: 'easeInOut' }}
+            >
+              <Hero onSwitch={handleSwitch} />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="hero2"
+              style={{ transformStyle: 'preserve-3d' }}
+              variants={variants}
+              initial={firstLoad.current ? 'center' : 'enter'}
+              animate="center"
+              exit="exit"
+              transition={{ duration: 0.7, ease: 'easeInOut' }}
+            >
+              <Hero2 onSwitch={handleSwitch} />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-      <AnimatePresence mode="wait">
-      {showFirst ? (
-        <motion.div
-          key="hero"
-          variants={variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{ duration: 0.45 }}
-        >
-          <Hero onSwitch={() => setShowFirst(false)} />
-        </motion.div>
-      ) : (
-        <motion.div
-          key="hero2"
-          variants={variants}
-          initial="enter"
-          animate="center"
-          exit="exit"
-          transition={{ duration: 0.45 }}
-        >
-          <Hero2 onSwitch={() => setShowFirst(true)} />
-        </motion.div>
+      {isShattering && (
+        <ShatterOverlay
+          rows={2}
+          cols={2}
+          duration={1100}
+          sourceSelector={showFirst ? '.hero' : '.hero-2'}
+          onComplete={() => setIsShattering(false)}
+        />
       )}
-    </AnimatePresence>
     </>
   )
 }

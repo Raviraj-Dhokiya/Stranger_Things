@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react'
 import { color, motion } from 'framer-motion'
-import './Hero.css'
+import './Hero2.css'
 import Navbar from './Navbar'
 
-const Hero2 = ({ onSwitch }) => {
+const Hero2 = ({ onSwitch, disableEntryAnimation = false }) => {
   const heroRef = useRef(null)
   const revealRef = useRef(null)
 
@@ -41,11 +41,19 @@ const Hero2 = ({ onSwitch }) => {
     }
 
     // Keep reveal active once mouse has moved over the hero area.
-    hero.addEventListener('mousemove', move)
+      const leave = () => {
+        visible = false
+        reveal.classList.remove('active')
+      }
 
-    return () => {
-      hero.removeEventListener('mousemove', move)
-    }
+      // Activate reveal while mouse is over the hero area; remove on leave.
+      hero.addEventListener('mousemove', move)
+      hero.addEventListener('mouseleave', leave)
+
+      return () => {
+        hero.removeEventListener('mousemove', move)
+        hero.removeEventListener('mouseleave', leave)
+      }
   }, [])
 
   const container = {
@@ -71,11 +79,11 @@ const Hero2 = ({ onSwitch }) => {
       ref={heroRef}
       style={{ backgroundImage: `url('/images/v1.png')` }}
     >
-      <motion.div variants={navbarVariant} initial="hidden" animate="visible">
+      <motion.div variants={navbarVariant} initial={disableEntryAnimation ? 'visible' : 'hidden'} animate="visible">
         <Navbar />
       </motion.div>
 
-      <motion.div className="hero-content" variants={container} initial="hidden" animate="visible">
+      <motion.div className="hero-content" variants={container} initial={disableEntryAnimation ? 'visible' : 'hidden'} animate="visible">
         <motion.div className="left" variants={item}>
           <h1 className="st-title">
             STRANGER<br />THINGS
@@ -92,7 +100,7 @@ const Hero2 = ({ onSwitch }) => {
 
         <motion.div className="right" variants={item}>
           <h1 className="st-title">The Mind Flayer</h1>
-          <motion.p className="st-text" variants={item} style={{ color: '#ffffff' }}>
+          <motion.p className="st-text" variants={item} style={{ color: 'hsla(0, 0%, 100%, 1.00)' }}>
             Shadows creep from another dimension, consuming everything in their path.
             Unravel the mystery and face the darkness head-on.
             Will you survive the terror of the Upside Down?

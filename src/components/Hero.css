@@ -92,6 +92,56 @@ text-shadow:
     background-color: black;
     color: aliceblue;
   }
+
+  /* Disable hover effects on buttons and text */
+  .left button,
+  .left button:hover,
+  .left h1,
+  .left h1:hover,
+  .left p,
+  .left p:hover,
+  .right h1,
+  .right h1:hover,
+  .right p,
+  .right p:hover {
+    transition: none !important;
+    transform: none !important;
+    text-decoration: none !important;
+    color: inherit !important;
+  }
+
+  /* Ensure buttons keep black background and white text */
+  .left button,
+  .left button:hover {
+    background-color: black !important;
+    color: #ffffff !important;
+    cursor: pointer;
+  }
+
+  /* Prevent any visual change on hover/focus/active for the main buttons */
+  .st-btn,
+  .st-btn:hover,
+  .st-btn:focus,
+  .st-btn:active {
+    background-color: black !important;
+    color: #ffffff !important;
+    border: 2px solid transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+    transition: none !important;
+    outline: none !important;
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  /* On hover show white border highlight and subtle glow */
+.st-btn:hover {
+  border-color: #ffffff !important;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.6) !important;
+}
+
+
   .right{
     position: absolute;
     bottom: 100px;
@@ -113,6 +163,13 @@ text-shadow:
         width: 400px;
     
     
+      }
+
+      /* Set text color for the default Hero variant (black) */
+      .hero .st-title,
+      .hero .st-desc,
+      .hero .st-text {
+        color: #000000 !important;
       }
 
 /* Upside Down state: swap background images (provide will2.webp and v2.png in /public/images/) */

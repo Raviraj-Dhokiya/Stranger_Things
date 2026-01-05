@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import './Hero.css'
 import Navbar from './Navbar'
 
-const Hero = ({ onSwitch }) => {
+const Hero = ({ onSwitch, disableEntryAnimation = false }) => {
   const heroRef = useRef(null)
   const revealRef = useRef(null)
 
@@ -40,12 +40,18 @@ const Hero = ({ onSwitch }) => {
       }
     }
 
-    // Keep reveal active once the mouse has moved over the hero area.
-    // Do not remove the active class on mouseleave so hover never stops.
+    const leave = () => {
+      visible = false
+      reveal.classList.remove('active')
+    }
+
+    // Activate reveal while mouse is over the hero area; remove on leave.
     hero.addEventListener('mousemove', move)
+    hero.addEventListener('mouseleave', leave)
 
     return () => {
       hero.removeEventListener('mousemove', move)
+      hero.removeEventListener('mouseleave', leave)
     }
   }, [])
 
@@ -68,11 +74,11 @@ const Hero = ({ onSwitch }) => {
 
   return (
     <div className="hero" ref={heroRef}>
-      <motion.div variants={navbarVariant} initial="hidden" animate="visible">
+      <motion.div variants={navbarVariant} initial={disableEntryAnimation ? 'visible' : 'hidden'} animate="visible">
         <Navbar />
       </motion.div>
 
-      <motion.div className="hero-content" variants={container} initial="hidden" animate="visible">
+      <motion.div className="hero-content" variants={container} initial={disableEntryAnimation ? 'visible' : 'hidden'} animate="visible">
         <motion.div className="left" variants={item}>
           <h1 className="st-title">
             STRANGER<br />THINGS
