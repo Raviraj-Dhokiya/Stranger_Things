@@ -9,6 +9,9 @@ function App() {
   const [showFirst, setShowFirst] = useState(true)
   const [isShattering, setIsShattering] = useState(false)
 
+  // 🔧 FIX 1: audioRef was missing (this caused white screen)
+  const audioRef = useRef(null)
+
   // used only to disable entry animation on very first mount
   const firstLoad = useRef(true)
 
@@ -19,9 +22,12 @@ function App() {
   const handleSwitch = () => {
     if (isShattering) return
 
-    // 🔥 IMPORTANT ORDER
-    setShowFirst(prev => !prev)   // switch component FIRST
-    setIsShattering(true)         // then run shatter animation
+    // 🔧 FIX 2: shatter FIRST, component switch AFTER
+    setIsShattering(true)
+
+    setTimeout(() => {
+      setShowFirst(prev => !prev)
+    }, 100) // small delay so correct DOM exists
   }
 
   const variants = {
@@ -32,9 +38,16 @@ function App() {
 
   return (
     <>
-      {<audio ref={audioRef} src="/music/Stranger_Things.mp3"
-        autoPlay loop playsInline preload="auto"
-        aria-label="background-music" />}
+      {/* 🎵 Background Music */}
+      <audio
+        ref={audioRef}
+        src="/music/Stranger_Things.mp3"
+        autoPlay
+        loop
+        playsInline
+        preload="auto"
+        aria-label="background-music"
+      />
 
       <div style={{ perspective: 1200 }}>
         <AnimatePresence mode="wait">
@@ -66,6 +79,7 @@ function App() {
         </AnimatePresence>
       </div>
 
+      {/* 💥 Shatter Effect */}
       {isShattering && (
         <ShatterOverlay
           rows={2}
