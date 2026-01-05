@@ -1,15 +1,23 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import './ShatterOverlay.css'
 
-export default function ShatterOverlay({ rows = 6, cols = 10, duration = 800, onComplete, sourceSelector = '.hero, .hero-2' }) {
+export default function ShatterOverlay({
+  rows = 2,
+  cols = 2,
+  duration = 1100,
+  onComplete,
+  sourceSelector = '.hero, .hero-2'
+}) {
   useEffect(() => {
     const overlay = document.querySelector('.shatter-overlay')
     if (!overlay) return
 
     const source = document.querySelector(sourceSelector)
+
+    // fallback safety
     if (!source) {
-      const tFallback = setTimeout(() => onComplete && onComplete(), 120)
-      return () => clearTimeout(tFallback)
+      const t = setTimeout(() => onComplete && onComplete(), 100)
+      return () => clearTimeout(t)
     }
 
     const rect = source.getBoundingClientRect()
@@ -17,14 +25,29 @@ export default function ShatterOverlay({ rows = 6, cols = 10, duration = 800, on
     const bh = Math.ceil(rect.height / rows)
 
     const shards = []
+
+    // 🔒 lock overlay size (no reflow later)
+    overlay.style.position = 'fixed'
+    overlay.style.inset = '0'
+    overlay.style.pointerEvents = 'none'
+
+    // 🧩 CREATE SHARDS
     for (let r = 0; r < rows; r++) {
       for (let c = 0; c < cols; c++) {
-        const el = document.createElement('div')
-        el.className = 'shard'
-        el.style.width = `${bw}px`
-        el.style.height = `${bh}px`
-        el.style.left = `${rect.left + c * bw}px`
-        el.style.top = `${rect.top + r * bh}px`
+        const shard = document.createElement('div')
+        shard.className = 'shard'
+
+        shard.style.position = 'absolute'
+        shard.style.width = `${bw}px`
+        shard.style.height = `${bh}px`
+        shard.style.left = `${rect.left + c * bw}px`
+        shard.style.top = `${rect.top + r * bh}px`
+        shard.style.overflow = 'hidden'
+        shard.style.willChange = 'transform, opacity'
+
+        // 🔴 CRITICAL: set initial transform explicitly
+        shard.style.transform = 'translate3d(0,0,0)'
+        shard.style.opacity = '1'
 
         const clone = source.cloneNode(true)
         clone.style.position = 'absolute'
@@ -34,40 +57,46 @@ export default function ShatterOverlay({ rows = 6, cols = 10, duration = 800, on
         clone.style.height = `${rect.height}px`
         clone.style.pointerEvents = 'none'
 
-        el.style.overflow = 'hidden'
-        el.appendChild(clone)
-
-        overlay.appendChild(el)
-        shards.push(el)
+        shard.appendChild(clone)
+        overlay.appendChild(shard)
+        shards.push({ shard, r, c })
       }
     }
 
     let timeoutId
 
+    // 🧠 FORCE BROWSER PAINT (THIS FIXES DELAY)
     requestAnimationFrame(() => {
-      shards.forEach((s, i) => {
-        const delay = (i % cols) * 20 + Math.floor(i / cols) * 10
-        s.style.transition = `transform ${duration}ms cubic-bezier(.2,.8,.2,1) ${delay}ms, opacity ${duration}ms ${delay}ms`
-        const rx = (Math.random() - 0.5) * 600
-        const ry = (Math.random() - 0.5) * 600
-        const rz = (Math.random() - 0.5) * 360
-        s.style.transform = `translate3d(${rx}px, ${ry}px, ${rz}px) rotate(${(Math.random()-0.5)*30}deg) scale(${1 + Math.random()*0.08})`
-        s.style.opacity = '0'
-      })
+      requestAnimationFrame(() => {
+        shards.forEach(({ shard, r, c }) => {
+          const dx = (c - (cols - 1) / 2) * 420
+          const dy = (r - (rows - 1) / 2) * 420
+          const rot = (Math.random() - 0.5) * 40
 
-      const total = duration + cols * 20 + rows * 10 + 80
-      timeoutId = setTimeout(() => {
-        shards.forEach(s => s.remove())
-        onComplete && onComplete()
-      }, total)
+          shard.style.transition = `
+            transform ${duration}ms cubic-bezier(.2,.8,.2,1),
+            opacity ${duration}ms ease-out
+          `
+          shard.style.transform = `
+            translate3d(${dx}px, ${dy}px, 0)
+            rotate(${rot}deg)
+            scale(1.05)
+          `
+          shard.style.opacity = '0'
+        })
+
+        timeoutId = setTimeout(() => {
+          shards.forEach(({ shard }) => shard.remove())
+          onComplete && onComplete()
+        }, duration + 60)
+      })
     })
 
     return () => {
       if (timeoutId) clearTimeout(timeoutId)
-      const existing = Array.from(document.querySelectorAll('.shatter-overlay .shard'))
-      existing.forEach(s => s.remove())
+      overlay.innerHTML = ''
     }
-  }, [sourceSelector, rows, cols, duration, onComplete])
+  }, [rows, cols, duration, onComplete, sourceSelector])
 
-  return <div className="shatter-overlay" aria-hidden="true"></div>
+  return <div className="shatter-overlay" aria-hidden="true" />
 }
