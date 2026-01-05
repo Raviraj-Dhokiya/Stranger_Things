@@ -24,14 +24,18 @@ function App() {
     setIsShattering(true)         // then run shatter animation
   }
 
- const variants = {
-  enter:  { opacity: 0, scale: 0.95 },
-  center: { opacity: 1, scale: 1 },
-  exit:   { opacity: 0, scale: 0.95 },
-}
+  const variants = {
+    enter: { opacity: 0, scale: 0.95 },
+    center: { opacity: 1, scale: 1 },
+    exit: { opacity: 0, scale: 0.95 },
+  }
 
   return (
     <>
+      {<audio ref={audioRef} src="/music/Stranger_Things.mp3"
+        autoPlay loop playsInline preload="auto"
+        aria-label="background-music" />}
+
       <div style={{ perspective: 1200 }}>
         <AnimatePresence mode="wait">
           {showFirst ? (
