@@ -3,7 +3,7 @@ import { motion } from 'framer-motion'
 import './Hero.css'
 import Navbar from './Navbar'
 
-const Hero = ({ onSwitch, disableEntryAnimation = false }) => {
+const Hero = ({ onSwitch, onPlay, disableEntryAnimation = false }) => {
   const heroRef = useRef(null)
   const revealRef = useRef(null)
 
@@ -45,7 +45,6 @@ const Hero = ({ onSwitch, disableEntryAnimation = false }) => {
       reveal.classList.remove('active')
     }
 
-    // Activate reveal while mouse is over the hero area; remove on leave.
     hero.addEventListener('mousemove', move)
     hero.addEventListener('mouseleave', leave)
 
@@ -64,21 +63,38 @@ const Hero = ({ onSwitch, disableEntryAnimation = false }) => {
 
   const item = {
     hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 70, damping: 12 } },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { type: 'spring', stiffness: 70, damping: 12 },
+    },
   }
 
   const navbarVariant = {
     hidden: { y: -100, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 80, damping: 14 } },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: 'spring', stiffness: 80, damping: 14 },
+    },
   }
 
   return (
     <div className="hero" ref={heroRef}>
-      <motion.div variants={navbarVariant} initial={disableEntryAnimation ? 'visible' : 'hidden'} animate="visible">
+      <motion.div
+        variants={navbarVariant}
+        initial={disableEntryAnimation ? 'visible' : 'hidden'}
+        animate="visible"
+      >
         <Navbar />
       </motion.div>
 
-      <motion.div className="hero-content" variants={container} initial={disableEntryAnimation ? 'visible' : 'hidden'} animate="visible">
+      <motion.div
+        className="hero-content"
+        variants={container}
+        initial={disableEntryAnimation ? 'visible' : 'hidden'}
+        animate="visible"
+      >
         <motion.div className="left" variants={item}>
           <h1 className="st-title">
             STRANGER<br />THINGS
@@ -88,7 +104,16 @@ const Hero = ({ onSwitch, disableEntryAnimation = false }) => {
             a hidden world awakens beneath Hawkins.
             Some doors, once opened, can never be closed.
           </motion.p>
-          <motion.button className="st-btn" variants={item} onClick={onSwitch}>
+          <motion.button
+            className="st-btn"
+            variants={item}
+            onClick={() => {
+              onSwitch()
+              if (typeof onPlay === 'function') {
+                onPlay() // 👈 Play audio when button clicked
+              }
+            }}
+          >
             Enter the Upside Down
           </motion.button>
         </motion.div>
