@@ -103,7 +103,7 @@ const Hero2 = ({ onSwitch, disableEntryAnimation = false }) => {
           <motion.p className="st-text" variants={item} style={{ color: 'hsla(0, 0%, 100%, 1.00)' }}>
             Shadows creep from another dimension, consuming everything in their path.
             Unravel the mystery and face the darkness head-on.
-            Will you survive the terror of the Upside Down?
+            Will you survive the terror of the Upside Down ?
           </motion.p>
         </motion.div>
       </motion.div>
